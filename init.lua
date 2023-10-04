@@ -67,10 +67,6 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   -- NOTE: First, some plugins that don't require any configuration
 
-  -- Git related plugins
-  'tpope/vim-fugitive',
-  'tpope/vim-rhubarb',
-
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
 
@@ -86,7 +82,7 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', tag = 'legacy', opts = {} },
+      { 'j-hui/fidget.nvim',       tag = 'legacy', opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -110,7 +106,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  { 'folke/which-key.nvim',  opts = {} },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -123,31 +119,40 @@ require('lazy').setup({
         topdelete = { text = '‾' },
         changedelete = { text = '~' },
       },
+      current_line_blame = true,
       on_attach = function(bufnr)
         vim.keymap.set('n', '<leader>hp', require('gitsigns').preview_hunk, { buffer = bufnr, desc = 'Preview git hunk' })
 
         -- don't override the built-in and fugitive keymaps
         local gs = package.loaded.gitsigns
-        vim.keymap.set({'n', 'v'}, ']c', function()
+        vim.keymap.set({ 'n', 'v' }, ']c', function()
           if vim.wo.diff then return ']c' end
           vim.schedule(function() gs.next_hunk() end)
           return '<Ignore>'
-        end, {expr=true, buffer = bufnr, desc = "Jump to next hunk"})
-        vim.keymap.set({'n', 'v'}, '[c', function()
+        end, { expr = true, buffer = bufnr, desc = "Jump to next hunk" })
+        vim.keymap.set({ 'n', 'v' }, '[c', function()
           if vim.wo.diff then return '[c' end
           vim.schedule(function() gs.prev_hunk() end)
           return '<Ignore>'
-        end, {expr=true, buffer = bufnr, desc = "Jump to previous hunk"})
+        end, { expr = true, buffer = bufnr, desc = "Jump to previous hunk" })
       end,
     },
   },
 
   {
-    -- Theme inspired by Atom
-    'navarasu/onedark.nvim',
+    'sainnhe/gruvbox-material',
     priority = 1000,
     config = function()
-      vim.cmd.colorscheme 'onedark'
+      vim.g.gruvbox_material_foreground = 'material'
+      vim.g.gruvbox_material_better_performance = 1
+      vim.g.gruvbox_material_disable_italic_comment = 0
+      vim.g.gruvbox_material_enable_bold = 1
+      vim.g.gruvbox_material_enable_italic = 1
+      vim.g.gruvbox_material_transparent_background = 0
+      vim.g.gruvbox_material_ui_contrast = 'high'
+      vim.g.gruvbox_material_diagnostic_line_highlight = 1
+      vim.g.gruvbox_material_diagnostic_virtual_text = 'colored'
+      vim.cmd.colorscheme 'gruvbox-material'
     end,
   },
 
@@ -158,7 +163,7 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = false,
-        theme = 'onedark',
+        theme = 'gruvbox',
         component_separators = '|',
         section_separators = '',
       },
@@ -170,10 +175,15 @@ require('lazy').setup({
     'lukas-reineke/indent-blankline.nvim',
     -- Enable `lukas-reineke/indent-blankline.nvim`
     -- See `:help indent_blankline.txt`
-    opts = {
-      char = '┊',
-      show_trailing_blankline_indent = false,
-    },
+    main = 'ibl',
+    config = function()
+      require('ibl').setup {
+        indent = {
+          char = '┊'
+        },
+        scope = { enabled = false }
+      }
+    end,
   },
 
   -- "gc" to comment visual regions/lines
@@ -209,6 +219,13 @@ require('lazy').setup({
     build = ':TSUpdate',
   },
 
+  {
+    "ray-x/lsp_signature.nvim",
+    event = "VeryLazy",
+    opts = {},
+    config = function(_, opts) require 'lsp_signature'.setup(opts) end
+  },
+  { "mbbill/undotree" },
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
@@ -228,42 +245,55 @@ require('lazy').setup({
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
 
--- Set highlight on search
-vim.o.hlsearch = false
+local options = {
+  breakindent = true,               -- Enable break indent
+  completeopt = 'menuone,noselect', -- Set completeopt to have a better completion experience
+  hlsearch = false,                 -- highlight all matches on previous search pattern
+  ignorecase = true,                -- ignore case in search patterns
+  termguicolors = true,             -- set term gui colors (most terminals support this)
+  undofile = true,                  -- enable persistent undo
+  expandtab = true,                 -- convert tabs to spaces
+  cursorline = false,               -- highlight the current line
+  number = true,                    -- set numbered lines
+  relativenumber = true,            -- set relative numbered lines
+  scrolloff = 8,                    -- minimal number of screen lines to keep above and below the cursor.
+  sidescrolloff = 8,                -- minimal number of screen lines to keep left and right of the cursor.
+  guicursor = "a:blinkon1",
+  foldmethod = 'indent',
+  foldenable = false,
+  foldlevel = 99,
 
--- Make line numbers default
-vim.wo.number = true
-
--- Enable mouse mode
-vim.o.mouse = 'a'
-
--- Sync clipboard between OS and Neovim.
---  Remove this option if you want your OS clipboard to remain independent.
---  See `:help 'clipboard'`
-vim.o.clipboard = 'unnamedplus'
-
--- Enable break indent
-vim.o.breakindent = true
-
--- Save undo history
-vim.o.undofile = true
-
--- Case-insensitive searching UNLESS \C or capital in search
-vim.o.ignorecase = true
-vim.o.smartcase = true
-
--- Keep signcolumn on by default
-vim.wo.signcolumn = 'yes'
-
--- Decrease update time
-vim.o.updatetime = 250
-vim.o.timeoutlen = 300
-
--- Set completeopt to have a better completion experience
-vim.o.completeopt = 'menuone,noselect'
-
--- NOTE: You should make sure your terminal supports this
-vim.o.termguicolors = true
+  backup = false,            -- creates a backup file
+  clipboard = "unnamedplus", -- allows neovim to access the system clipboard
+  cmdheight = 1,             -- more space in the neovim command line for displaying messages
+  conceallevel = 0,          -- so that `` is visible in markdown files
+  fileencoding = "utf-8",    -- the encoding written to a file
+  foldexpr = "",             -- set to "nvim_treesitter#foldexpr()" for treesitter based folding
+  guifont = "monospace:h17", -- the font used in graphical neovim applications
+  hidden = true,             -- required to keep multiple buffers and open multiple buffers
+  mouse = "a",               -- allow the mouse to be used in neovim
+  pumheight = 10,            -- pop up menu height
+  showmode = false,          -- we don't need to see things like -- INSERT -- anymore
+  smartcase = true,          -- smart case
+  splitbelow = true,         -- force all horizontal splits to go below current window
+  splitright = true,         -- force all vertical splits to go to the right of current window
+  swapfile = false,          -- creates a swapfile
+  timeoutlen = 300,          -- time to wait for a mapped sequence to complete (in milliseconds)
+  title = true,              -- set the title of window to the value of the titlestring
+  updatetime = 250,          -- faster completion
+  writebackup = false,       -- if a file is being edited by another program (or was written to file while editing with another program), it is not allowed to be edited
+  shiftwidth = 2,            -- the number of spaces inserted for each indentation
+  tabstop = 2,               -- insert 2 spaces for a tab
+  numberwidth = 4,           -- set number column width to 2 {default 4}
+  signcolumn = "yes",        -- always show the sign column, otherwise it would shift the text each time
+  wrap = false,              -- display lines as one long line
+  showcmd = false,
+  ruler = false,
+  laststatus = 3,
+}
+for key, value in pairs(options) do
+  vim.opt[key] = value
+end
 
 -- [[ Basic Keymaps ]]
 
@@ -274,6 +304,35 @@ vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+
+vim.keymap.set("v", "p", '"_dP', { desc = '' })
+
+vim.keymap.set('n', '<leader>w', ':w<cr>', { desc = 'Save current buffer' })
+vim.keymap.set('n', '<leader>W', ':wa<cr>', { desc = 'Save all buffers' })
+vim.keymap.set('n', '<leader>q', ':q<cr>', { desc = '[q]uit window' })
+vim.keymap.set('n', '<leader>Q', ':qa<cr>', { desc = '[Q]uit Neovim' })
+vim.keymap.set('n', '<leader>e', ':Ex<cr>', { desc = 'File [e]xplorer' })
+vim.keymap.set('n', '<leader>E', ':Vex<cr>', { desc = 'Side File [E]xplorer' })
+vim.keymap.set('n', '<leader>bd', ':bd<cr>', { desc = '[b]uffers [d]elete' })
+vim.keymap.set('n', '<leader>bD', ':bufdo bd<cr>', { desc = '[e] [b]uffers all [D]elete' })
+
+-- Better window navigation
+-- vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = '' })
+-- vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = '' })
+-- vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = '' })
+-- vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = '' })
+
+-- Stay in indent mode
+vim.keymap.set('v', '<', '<gv', { desc = '' })
+vim.keymap.set('v', '>', '>gv', { desc = '' })
+
+-- Move text up and down
+vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv", { desc = '' })
+vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { desc = '' })
+
+vim.keymap.set('n', '<leader>u', '<CMD>UndotreeToggle<CR><CMD>UndotreeFocus<CR>', { desc = '[u]ndo tree' })
+
+vim.keymap.set('n', '<leader>f', ':Format<cr>', { desc = '[f]ormat Buffers' })
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
@@ -313,8 +372,22 @@ vim.keymap.set('n', '<leader>/', function()
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
-vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
-vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
+vim.keymap.set('n', '<leader>gf',
+  function()
+    require('telescope.builtin').git_files(require('telescope.themes').get_dropdown {
+      winblend = 10,
+      previewer = false,
+    })
+  end
+  , { desc = 'Search [G]it [F]iles' })
+vim.keymap.set('n', '<leader>sf',
+  function()
+    require('telescope.builtin').find_files(require('telescope.themes').get_dropdown {
+      winblend = 10,
+      previewer = false,
+    })
+  end,
+  { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
@@ -327,8 +400,16 @@ require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
   ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim' },
 
+  -- Install parsers synchronously (only applied to `ensure_installed`)
+  sync_install = false,
+
+  -- List of parsers to ignore installing (or "all")
+  ignore_install = {},
+
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
   auto_install = false,
+
+  modules = {},
 
   highlight = { enable = true },
   indent = { enable = true },
@@ -359,16 +440,16 @@ require('nvim-treesitter.configs').setup {
       enable = true,
       set_jumps = true, -- whether to set jumps in the jumplist
       goto_next_start = {
-        [']m'] = '@function.outer',
-        [']]'] = '@class.outer',
+        ['<leader>tfn'] = '@function.outer',
+        ['<leader>tcn'] = '@class.outer',
       },
       goto_next_end = {
         [']M'] = '@function.outer',
         [']['] = '@class.outer',
       },
       goto_previous_start = {
-        ['[m'] = '@function.outer',
-        ['[['] = '@class.outer',
+        ['<leader>tfp'] = '@function.outer',
+        ['<leader>tcp'] = '@class.outer',
       },
       goto_previous_end = {
         ['[M'] = '@function.outer',
@@ -378,20 +459,20 @@ require('nvim-treesitter.configs').setup {
     swap = {
       enable = true,
       swap_next = {
-        ['<leader>a'] = '@parameter.inner',
+        ['<leader>tsn'] = '@parameter.inner',
       },
       swap_previous = {
-        ['<leader>A'] = '@parameter.inner',
+        ['<leader>tsp'] = '@parameter.inner',
       },
     },
   },
 }
 
 -- Diagnostic keymaps
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+vim.keymap.set('n', '<leader>lk', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
+vim.keymap.set('n', '<leader>lj', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
+vim.keymap.set('n', '<leader>le', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
+vim.keymap.set('n', '<leader>lq', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
 
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
@@ -422,15 +503,15 @@ local on_attach = function(_, bufnr)
 
   -- See `:help K` for why this keymap
   nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-  nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
+  nmap('<C-K>', vim.lsp.buf.signature_help, 'Signature Documentation')
 
   -- Lesser used LSP functionality
   nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-  nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
-  nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
-  nmap('<leader>wl', function()
-    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-  end, '[W]orkspace [L]ist Folders')
+  -- nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
+  -- nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
+  -- nmap('<leader>wl', function()
+  --   print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+  -- end, '[W]orkspace [L]ist Folders')
 
   -- Create a command `:Format` local to the LSP buffer
   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
@@ -534,6 +615,45 @@ cmp.setup {
     { name = 'luasnip' },
   },
 }
+
+-- [[ NETRW ]]
+vim.g.netrw_liststyle = 3
+vim.g.netrw_browse_split = 0
+vim.g.netrw_altv = 1
+vim.g.netrw_winsize = 25
+
+vim.cmd([[
+  augroup _general_settings
+    autocmd!
+    autocmd FileType qf,help,man,lspinfo nnoremap <silent> <buffer> q :close<CR>
+    autocmd BufWinEnter * :set formatoptions-=cro
+    autocmd FileType qf set nobuflisted
+    autocmd BufWinEnter * :set laststatus=3
+  augroup end
+
+  augroup _git
+    autocmd!
+    autocmd FileType gitcommit setlocal wrap
+    autocmd FileType gitcommit setlocal spell
+  augroup end
+
+  augroup _markdown
+    autocmd!
+    autocmd FileType markdown setlocal wrap
+    autocmd FileType markdown setlocal spell
+  augroup end
+
+  augroup _auto_resize
+    autocmd!
+    autocmd VimResized * tabdo wincmd =
+  augroup end
+
+  " Check if we need to reload the file when it changed
+  au FocusGained * :checktime
+
+  " go to last loc when opening a buffer
+  autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
+]])
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
