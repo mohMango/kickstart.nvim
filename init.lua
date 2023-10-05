@@ -122,6 +122,8 @@ require('lazy').setup({
       current_line_blame = true,
       on_attach = function(bufnr)
         vim.keymap.set('n', '<leader>hp', require('gitsigns').preview_hunk, { buffer = bufnr, desc = 'Preview git hunk' })
+        vim.keymap.set('n', '<leader>hr', require('gitsigns').reset_hunk, { buffer = bufnr, desc = 'Reset git hunk' })
+        vim.keymap.set('n', '<leader>hb', require('gitsigns').blame_line, { buffer = bufnr, desc = 'Blame line' })
 
         -- don't override the built-in and fugitive keymaps
         local gs = package.loaded.gitsigns
@@ -622,38 +624,60 @@ vim.g.netrw_browse_split = 0
 vim.g.netrw_altv = 1
 vim.g.netrw_winsize = 25
 
-vim.cmd([[
-  augroup _general_settings
-    autocmd!
-    autocmd FileType qf,help,man,lspinfo nnoremap <silent> <buffer> q :close<CR>
-    autocmd BufWinEnter * :set formatoptions-=cro
-    autocmd FileType qf set nobuflisted
-    autocmd BufWinEnter * :set laststatus=3
-  augroup end
+-- [[ autocommands ]]
+vim.api.nvim_create_autocmd({ 'FileType' }, {
+  pattern = { 'qf', 'help', 'man', 'lspinfo', 'spectre_panel', 'lir' },
+  callback = function()
+    vim.cmd [[
+      nnoremap <silent> <buffer> q :close<CR>
+      set nobuflisted
+    ]]
+  end,
+})
 
-  augroup _git
-    autocmd!
-    autocmd FileType gitcommit setlocal wrap
-    autocmd FileType gitcommit setlocal spell
-  augroup end
+vim.api.nvim_create_autocmd({ "FileType" }, {
+  pattern = { 'gitcommit', 'markdown' },
+  callback = function()
+    vim.cmd [[
+      setlocal wrap
+      setlocal spell
+    ]]
+  end,
+})
 
-  augroup _markdown
-    autocmd!
-    autocmd FileType markdown setlocal wrap
-    autocmd FileType markdown setlocal spell
-  augroup end
+vim.api.nvim_create_autocmd({ "VimResized" }, {
+  callback = function()
+    vim.cmd "tabdo wincmd ="
+  end,
+})
 
-  augroup _auto_resize
-    autocmd!
-    autocmd VimResized * tabdo wincmd =
-  augroup end
+vim.api.nvim_create_autocmd({ 'FocusGained' }, {
+  pattern = { '*' },
+  callback = function()
+    vim.cmd [[
+      :checktime
+    ]]
+  end
+})
 
-  " Check if we need to reload the file when it changed
-  au FocusGained * :checktime
+vim.api.nvim_create_autocmd({ 'BufReadPost' }, {
+  pattern = { '*' },
+  callback = function()
+    vim.cmd [[
+      if line("'\"") > 1 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
+    ]]
+  end
+})
 
-  " go to last loc when opening a buffer
-  autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | execute "normal! g`\"" | endif
-]])
+vim.api.nvim_create_autocmd({ 'FileType' }, {
+  pattern = { 'netrw' },
+  callback = function()
+    vim.cmd [[
+      nnoremap <silent> <buffer> <leader>q :bd<CR>
+      set nobuflisted
+    ]]
+  end,
+})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
