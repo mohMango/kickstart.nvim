@@ -90,21 +90,23 @@ require('lazy').setup({
   },
 
   {
-    -- Autocompletion
-    'hrsh7th/nvim-cmp',
+    'VonHeikemen/lsp-zero.nvim',
+    branch = 'v3.x',
+    opts = {},
     dependencies = {
-      -- Snippet Engine & its associated nvim-cmp source
-      'L3MON4D3/LuaSnip',
+      -- Autocompletion
+      'hrsh7th/nvim-cmp',
+      'hrsh7th/cmp-buffer',
+      'hrsh7th/cmp-path',
       'saadparwaiz1/cmp_luasnip',
-
-      -- Adds LSP completion capabilities
       'hrsh7th/cmp-nvim-lsp',
+      'hrsh7th/cmp-nvim-lua',
 
-      -- Adds a number of user-friendly snippets
+      -- Snippets
+      'L3MON4D3/LuaSnip',
       'rafamadriz/friendly-snippets',
-    },
+    }
   },
-
   -- Useful plugin to show you pending keybinds.
   { 'folke/which-key.nvim',  opts = {} },
   {
@@ -334,19 +336,6 @@ vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv", { desc = '' })
 
 vim.keymap.set('n', '<leader>u', '<CMD>UndotreeToggle<CR><CMD>UndotreeFocus<CR>', { desc = '[u]ndo tree' })
 
-vim.keymap.set('n', '<leader>f', ':Format<cr>', { desc = '[f]ormat Buffers' })
-
--- [[ Highlight on yank ]]
--- See `:help vim.highlight.on_yank()`
-local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
-vim.api.nvim_create_autocmd('TextYankPost', {
-  callback = function()
-    vim.highlight.on_yank()
-  end,
-  group = highlight_group,
-  pattern = '*',
-})
-
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
 require('telescope').setup {
@@ -439,7 +428,7 @@ require('nvim-treesitter.configs').setup {
       },
     },
     move = {
-      enable = true,
+      enable = false,
       set_jumps = true, -- whether to set jumps in the jumplist
       goto_next_start = {
         ['<leader>tfn'] = '@function.outer',
@@ -476,147 +465,40 @@ vim.keymap.set('n', '<leader>lj', vim.diagnostic.goto_next, { desc = 'Go to next
 vim.keymap.set('n', '<leader>le', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>lq', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
 
--- [[ Configure LSP ]]
---  This function gets run when an LSP connects to a particular buffer.
-local on_attach = function(_, bufnr)
-  -- NOTE: Remember that lua is a real programming language, and as such it is possible
-  -- to define small helper and utility functions so you don't have to repeat yourself
-  -- many times.
-  --
-  -- In this case, we create a function that lets us more easily define mappings specific
-  -- for LSP related items. It sets the mode, buffer and description for us each time.
-  local nmap = function(keys, func, desc)
-    if desc then
-      desc = 'LSP: ' .. desc
-    end
-
-    vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
-  end
-
-  nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-  nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
-
-  nmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
-  nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-  nmap('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
-  nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
-  nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
-  nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
-
-  -- See `:help K` for why this keymap
-  nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-  nmap('<C-K>', vim.lsp.buf.signature_help, 'Signature Documentation')
-
-  -- Lesser used LSP functionality
-  nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-  -- nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
-  -- nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
-  -- nmap('<leader>wl', function()
-  --   print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-  -- end, '[W]orkspace [L]ist Folders')
-
-  -- Create a command `:Format` local to the LSP buffer
-  vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
-    vim.lsp.buf.format()
-  end, { desc = 'Format current buffer with LSP' })
-end
-
--- Enable the following language servers
---  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
---
---  Add any additional override configuration in the following tables. They will be passed to
---  the `settings` field of the server config. You must look up that documentation yourself.
---
---  If you want to override the default filetypes that your language server will attach to you can
---  define the property 'filetypes' to the map in question.
-local servers = {
-  -- clangd = {},
-  -- gopls = {},
-  -- pyright = {},
-  -- rust_analyzer = {},
-  -- tsserver = {},
-  -- html = { filetypes = { 'html', 'twig', 'hbs'} },
-
-  lua_ls = {
-    Lua = {
-      workspace = { checkThirdParty = false },
-      telemetry = { enable = false },
-    },
-  },
-}
 
 -- Setup neovim lua configuration
 require('neodev').setup()
 
--- nvim-cmp supports additional completion capabilities, so broadcast that to servers
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
-
+-- [[ LSP ]]
 -- Ensure the servers above are installed
-local mason_lspconfig = require 'mason-lspconfig'
+local lsp_zero = require 'lsp-zero'
 
-mason_lspconfig.setup {
-  ensure_installed = vim.tbl_keys(servers),
-}
+lsp_zero.extend_lspconfig()
+lsp_zero.on_attach(function(_, bufnr)
+  -- see :help lsp-zero-keybindings
+  -- to learn the available actions
+  lsp_zero.default_keymaps({buffer = bufnr})
+  vim.keymap.set('n', '<leader>la', vim.lsp.buf.code_action, { desc = '[l]sp code [a]ction' })
+  vim.keymap.set('n', '<leader>lr', vim.lsp.buf.rename, { desc = '[l]sp [r]enames' })
+  vim.keymap.set('n', '<leader>lf', ':LspZeroFormat<cr>', { desc = '[l]sp[f]ormat Buffers' })
+end)
 
-mason_lspconfig.setup_handlers {
-  function(server_name)
-    require('lspconfig')[server_name].setup {
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = servers[server_name],
-      filetypes = (servers[server_name] or {}).filetypes,
-    }
-  end
-}
+require 'mason-lspconfig'.setup({
+  handlers = {
+    lsp_zero.default_setup,
+  }
+})
 
--- [[ Configure nvim-cmp ]]
--- See `:help cmp`
 local cmp = require 'cmp'
-local luasnip = require 'luasnip'
-require('luasnip.loaders.from_vscode').lazy_load()
-luasnip.config.setup {}
+cmp.setup({
+  mapping = cmp.mapping.preset.insert({
+    -- `Enter` key to confirm completion
+    ['<CR>'] = cmp.mapping.confirm({select = false}),
 
-cmp.setup {
-  snippet = {
-    expand = function(args)
-      luasnip.lsp_expand(args.body)
-    end,
-  },
-  mapping = cmp.mapping.preset.insert {
-    ['<C-n>'] = cmp.mapping.select_next_item(),
-    ['<C-p>'] = cmp.mapping.select_prev_item(),
-    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete {},
-    ['<CR>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
-      select = true,
-    },
-    ['<Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_locally_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-    ['<S-Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.locally_jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-  },
-  sources = {
-    { name = 'nvim_lsp' },
-    { name = 'luasnip' },
-  },
-}
+    -- Ctrl+Space to trigger completion menu
+    ['<C-Space>'] = cmp.mapping.complete(),
+  })
+})
 
 -- [[ NETRW ]]
 vim.g.netrw_liststyle = 3
@@ -625,6 +507,16 @@ vim.g.netrw_altv = 1
 vim.g.netrw_winsize = 25
 
 -- [[ autocommands ]]
+-- See `:help vim.highlight.on_yank()`
+local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
+vim.api.nvim_create_autocmd('TextYankPost', {
+  callback = function()
+    vim.highlight.on_yank()
+  end,
+  group = highlight_group,
+  pattern = '*',
+})
+
 vim.api.nvim_create_autocmd({ 'FileType' }, {
   pattern = { 'qf', 'help', 'man', 'lspinfo', 'spectre_panel', 'lir' },
   callback = function()
