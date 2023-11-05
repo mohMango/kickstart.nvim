@@ -123,9 +123,9 @@ require('lazy').setup({
       },
       current_line_blame = true,
       on_attach = function(bufnr)
-        vim.keymap.set('n', '<leader>hp', require('gitsigns').preview_hunk, { buffer = bufnr, desc = 'Preview git hunk' })
-        vim.keymap.set('n', '<leader>hr', require('gitsigns').reset_hunk, { buffer = bufnr, desc = 'Reset git hunk' })
-        vim.keymap.set('n', '<leader>hb', require('gitsigns').blame_line, { buffer = bufnr, desc = 'Blame line' })
+        vim.keymap.set('n', '<leader>gp', require('gitsigns').preview_hunk, { buffer = bufnr, desc = 'Preview git hunk' })
+        vim.keymap.set('n', '<leader>gr', require('gitsigns').reset_hunk, { buffer = bufnr, desc = 'Reset git hunk' })
+        vim.keymap.set('n', '<leader>gb', require('gitsigns').blame_line, { buffer = bufnr, desc = 'Blame line' })
 
         -- don't override the built-in and fugitive keymaps
         local gs = package.loaded.gitsigns
@@ -161,18 +161,23 @@ require('lazy').setup({
   },
 
   {
-    "catppuccin/nvim",
-    name = "catppuccin",
+    'catppuccin/nvim',
+    name = 'catppuccin',
     priority = 1000,
     config = function()
       require('catppuccin').setup({
         flavour = 'macchiato',          -- latte, frappe, macchiato, mocha
         transparent_background = false, -- disables setting the background color.
-        show_end_of_buffer = false,     -- shows the '~' characters after the end of buffers
+        show_end_of_buffer = true,      -- shows the '~' characters after the end of buffers
         term_colors = false,            -- sets terminal colors (e.g. `g:terminal_color_0`)
         no_italic = false,              -- Force no italic
         no_bold = false,                -- Force no bold
         no_underline = false,           -- Force no underline
+        custom_highlights = function(colors)
+          return {
+            netrwTreeBar = { fg = colors.surface0 },
+          }
+        end,
       })
       -- setup must be called before loading
       vim.cmd.colorscheme 'catppuccin'
@@ -263,7 +268,8 @@ require('lazy').setup({
         cmp_autopairs.on_confirm_done()
       )
     end,
-  }
+  },
+  { 'Ciel-MC/rust-tools.nvim' },
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
@@ -439,56 +445,19 @@ require('nvim-treesitter.configs').setup {
   highlight = { enable = true },
   indent = { enable = true },
   incremental_selection = {
-    enable = true,
-    keymaps = {
-      init_selection = '<c-space>',
-      node_incremental = '<c-space>',
-      scope_incremental = '<c-s>',
-      node_decremental = '<M-space>',
-    },
+    enable = false,
   },
   textobjects = {
     select = {
-      enable = true,
-      lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
-      keymaps = {
-        -- You can use the capture groups defined in textobjects.scm
-        ['aa'] = '@parameter.outer',
-        ['ia'] = '@parameter.inner',
-        ['af'] = '@function.outer',
-        ['if'] = '@function.inner',
-        ['ac'] = '@class.outer',
-        ['ic'] = '@class.inner',
-      },
+      enable = false,
+      lookahead = false, -- Automatically jump forward to textobj, similar to targets.vim
     },
     move = {
       enable = false,
       set_jumps = true, -- whether to set jumps in the jumplist
-      goto_next_start = {
-        ['<leader>tfn'] = '@function.outer',
-        ['<leader>tcn'] = '@class.outer',
-      },
-      goto_next_end = {
-        [']M'] = '@function.outer',
-        [']['] = '@class.outer',
-      },
-      goto_previous_start = {
-        ['<leader>tfp'] = '@function.outer',
-        ['<leader>tcp'] = '@class.outer',
-      },
-      goto_previous_end = {
-        ['[M'] = '@function.outer',
-        ['[]'] = '@class.outer',
-      },
     },
     swap = {
-      enable = true,
-      swap_next = {
-        ['<leader>tsn'] = '@parameter.inner',
-      },
-      swap_previous = {
-        ['<leader>tsp'] = '@parameter.inner',
-      },
+      enable = false,
     },
   },
 }
@@ -567,11 +536,22 @@ cmp.setup({
   },
 })
 
+local rust_tools = require 'rust-tools'
+rust_tools.setup({
+  server = {
+    on_attach = function(_, bufnr)
+      vim.keymap.set('n', '<Leader>rr', rust_tools.runnables.runnables, { buffer = bufnr, desc = '[r]ust [r]un' })
+      rust_tools.inlay_hints.enable()
+    end,
+  },
+})
+
 -- [[ NETRW ]]
 vim.g.netrw_liststyle = 3
 vim.g.netrw_browse_split = 0
 vim.g.netrw_altv = 1
 vim.g.netrw_winsize = 25
+vim.g.netrw_list_hide = 'netrw_gitignore#Hide()'
 
 -- [[ autocommands ]]
 -- See `:help vim.highlight.on_yank()`
