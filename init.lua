@@ -82,7 +82,18 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', tag = 'legacy', opts = {} },
+      {
+        'j-hui/fidget.nvim',
+        tag = 'legacy',
+        opts = {
+          window = {
+            relative = 'win', -- where to anchor, either "win" or "editor"
+            blend = 0, -- &winblend for the window
+            zindex = nil, -- the zindex value for the window
+            border = 'none', -- style of border for the fidget window
+          },
+        },
+      },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -175,7 +186,7 @@ require('lazy').setup({
     config = function()
       require('catppuccin').setup {
         flavour = 'macchiato', -- latte, frappe, macchiato, mocha
-        transparent_background = false, -- disables setting the background color.
+        transparent_background = true, -- disables setting the background color.
         show_end_of_buffer = true, -- shows the '~' characters after the end of buffers
         term_colors = false, -- sets terminal colors (e.g. `g:terminal_color_0`)
         no_italic = false, -- Force no italic
@@ -319,7 +330,11 @@ require('lazy').setup({
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   -- { import = 'custom.plugins' },
-}, {})
+}, {
+  ui = {
+    border = 'rounded',
+  },
+})
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -436,20 +451,17 @@ vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { d
 vim.keymap.set('n', '<leader>/', function()
   -- You can pass additional configuration to telescope to change theme, layout, etc.
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-    winblend = 10,
     previewer = false,
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
 vim.keymap.set('n', '<leader>gf', function()
   require('telescope.builtin').git_files(require('telescope.themes').get_dropdown {
-    winblend = 10,
     previewer = false,
   })
 end, { desc = 'Search [G]it [F]iles' })
 vim.keymap.set('n', '<leader>sf', function()
   require('telescope.builtin').find_files(require('telescope.themes').get_dropdown {
-    winblend = 10,
     previewer = false,
   })
 end, { desc = '[S]earch [F]iles' })
