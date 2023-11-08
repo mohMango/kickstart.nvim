@@ -365,7 +365,9 @@ local options = {
   laststatus = 3,
 }
 for key, value in pairs(options) do
-  vim.opt[key] = value
+  if vim.bo.filetype ~= 'lazy' then
+    vim.opt[key] = value
+  end
 end
 
 -- [[ Basic Keymaps ]]
