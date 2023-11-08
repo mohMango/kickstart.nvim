@@ -119,7 +119,15 @@ require('lazy').setup({
     },
   },
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  {
+    'folke/which-key.nvim',
+    event = 'VeryLazy',
+    opts = {
+      window = {
+        border = 'rounded', -- none, single, double, shadow
+      },
+    },
+  },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -579,6 +587,10 @@ cmp.setup {
       item.menu = menu_icon[entry.source.name]
       return item
     end,
+  },
+  window = {
+    completion = cmp.config.window.bordered(),
+    documentation = cmp.config.window.bordered(),
   },
 }
 
