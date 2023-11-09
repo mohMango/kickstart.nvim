@@ -688,6 +688,7 @@ vim.api.nvim_create_user_command('ExploreFind', function()
   end
   vim.cmd('Explore ' .. relative_path)
   vim.cmd.normal 'n'
+  vim.cmd.normal 'zz'
 end, {})
 
 Netrw_buffer = -1
@@ -701,6 +702,7 @@ vim.api.nvim_create_user_command('VexploreFind', function()
     end
     vim.cmd('Vexplore ' .. relative_path)
     vim.cmd.normal 'n'
+    vim.cmd.normal 'zz'
     local buf = vim.api.nvim_get_current_buf()
     Netrw_buffer = vim.fn.bufnr(buf)
   else
