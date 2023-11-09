@@ -416,8 +416,8 @@ vim.keymap.set('n', '<leader>w', ':w<cr>', { desc = 'Save current buffer' })
 vim.keymap.set('n', '<leader>W', ':wa<cr>', { desc = 'Save all buffers' })
 vim.keymap.set('n', '<leader>q', ':q<cr>', { desc = '[q]uit window' })
 vim.keymap.set('n', '<leader>Q', ':qa<cr>', { desc = '[Q]uit Neovim' })
-vim.keymap.set('n', '<leader>e', ':Ex<cr>', { desc = 'File [e]xplorer' })
-vim.keymap.set('n', '<leader>E', ':Vex<cr>', { desc = 'Side File [E]xplorer' })
+vim.keymap.set('n', '<leader>e', ':ExploreFind<cr>', { desc = 'File [e]xplorer' })
+vim.keymap.set('n', '<leader>E', ':VexploreFind<cr>', { desc = 'Side File [E]xplorer' })
 vim.keymap.set('n', '<leader>bd', ':bd<cr>', { desc = '[b]uffers [d]elete' })
 vim.keymap.set('n', '<leader>bD', ':bufdo bd<cr>', { desc = '[e] [b]uffers all [D]elete' })
 
@@ -605,11 +605,11 @@ rust_tools.setup {
 }
 
 -- [[ NETRW ]]
-vim.g.netrw_liststyle = 3
+vim.g.netrw_liststyle = 4
 vim.g.netrw_browse_split = 0
 vim.g.netrw_altv = 1
 vim.g.netrw_winsize = 25
-vim.g.netrw_list_hide = 'netrw_gitignore#Hide()'
+vim.g.netrw_list_hide = vim.fn['netrw_gitignore#Hide']()
 
 -- [[ autocommands ]]
 -- See `:help vim.highlight.on_yank()`
@@ -675,6 +675,38 @@ vim.api.nvim_create_autocmd({ 'FileType' }, {
     ]]
   end,
 })
+
+-- show file in netrw
+-- more info: https://superuser.com/questions/1531456/how-to-reveal-a-file-in-vim-netrw-treeview
+vim.api.nvim_create_user_command('ExploreFind', function()
+  vim.cmd [[:let netrw_browse_split = 0]]
+  local relative_path = vim.fn.expand '%:h'
+  vim.cmd.let '@/=expand("%:t")'
+  if string.len(relative_path) == 0 then
+    vim.cmd.let "@/='./'"
+  end
+  vim.cmd('Explore ' .. relative_path)
+  vim.cmd.normal 'n'
+end, {})
+
+Netrw_buffer = -1
+vim.api.nvim_create_user_command('VexploreFind', function()
+  if Netrw_buffer == -1 then
+    vim.cmd [[:let netrw_browse_split = 4]]
+    local relative_path = vim.fn.expand '%:h'
+    vim.cmd.let '@/=expand("%:t")'
+    if string.len(relative_path) == 0 then
+      vim.cmd.let "@/='./'"
+    end
+    vim.cmd('Vexplore ' .. relative_path)
+    vim.cmd.normal 'n'
+    local buf = vim.api.nvim_get_current_buf()
+    Netrw_buffer = vim.fn.bufnr(buf)
+  else
+    vim.api.nvim_buf_delete(Netrw_buffer, {})
+    Netrw_buffer = -1
+  end
+end, {})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
