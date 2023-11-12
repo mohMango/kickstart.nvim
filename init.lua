@@ -77,7 +77,15 @@ require('lazy').setup({
     'neovim/nvim-lspconfig',
     dependencies = {
       -- Automatically install LSPs to stdpath for neovim
-      { 'williamboman/mason.nvim', config = true },
+      {
+        'williamboman/mason.nvim',
+        config = true,
+        opts = {
+          ui = {
+            border = 'rounded',
+          },
+        },
+      },
       'williamboman/mason-lspconfig.nvim',
 
       -- Useful status updates for LSP
@@ -232,14 +240,12 @@ require('lazy').setup({
     -- Enable `lukas-reineke/indent-blankline.nvim`
     -- See `:help indent_blankline.txt`
     main = 'ibl',
-    config = function()
-      require('ibl').setup {
-        indent = {
-          char = '┊',
-        },
-        scope = { enabled = false },
-      }
-    end,
+    opts = {
+      indent = {
+        char = '┊',
+      },
+      scope = { enabled = false },
+    },
   },
 
   -- "gc" to comment visual regions/lines
