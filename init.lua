@@ -106,6 +106,9 @@ require('lazy').setup({
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
     },
+    config = function()
+      require('lspconfig.ui.windows').default_options.border = 'rounded'
+    end,
   },
 
   {
