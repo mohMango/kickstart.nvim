@@ -335,6 +335,10 @@ require('lazy').setup({
       end, { desc = '[l]sp [f]ormat Buffer' })
     end,
   },
+  {
+    'ThePrimeagen/harpoon',
+    dependencies = 'nvim-lua/plenary.nvim',
+  },
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
@@ -614,6 +618,27 @@ rust_tools.setup {
     end,
   },
 }
+
+-- [[ HARPOON ]]
+local harpoon_mark = require 'harpoon.mark'
+local harpoon_ui = require 'harpoon.ui'
+
+-- vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
+vim.keymap.set('n', '<leader>ha', harpoon_mark.add_file, { desc = '[h]arpoon [a]dd' })
+vim.keymap.set('n', '<leader>he', harpoon_ui.toggle_quick_menu, { desc = '[h]arpoon [e]xplorer' })
+
+vim.keymap.set('n', '<leader>1', function()
+  harpoon_ui.nav_file(1)
+end, { desc = 'Harpoon go to file [1]' })
+vim.keymap.set('n', '<leader>2', function()
+  harpoon_ui.nav_file(2)
+end, { desc = 'Harpoon go to file [2]' })
+vim.keymap.set('n', '<leader>3', function()
+  harpoon_ui.nav_file(3)
+end, { desc = 'Harpoon go to file [3]' })
+vim.keymap.set('n', '<leader>4', function()
+  harpoon_ui.nav_file(4)
+end, { desc = 'Harpoon go to file [4]' })
 
 -- [[ NETRW ]]
 vim.g.netrw_liststyle = 4
