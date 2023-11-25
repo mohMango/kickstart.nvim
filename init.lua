@@ -565,9 +565,19 @@ require('mason-lspconfig').setup {
   },
 }
 
+require('luasnip.loaders.from_vscode').lazy_load()
+
 local cmp_action = require('lsp-zero').cmp_action()
 local cmp = require 'cmp'
 cmp.setup {
+  sources = cmp.config.sources {
+    { name = 'nvim_lsp' },
+    { name = 'luasnip' },
+    { name = 'buffer' },
+    { name = 'path' },
+    { name = 'nvim_lua' },
+    { name = 'cmp_tabnine' },
+  },
   mapping = cmp.mapping.preset.insert {
     ['<C-n>'] = cmp.mapping.select_next_item(),
     ['<C-p>'] = cmp.mapping.select_prev_item(),
@@ -586,15 +596,6 @@ cmp.setup {
 
     -- here is where the change happens
     format = function(entry, item)
-      local menu_icon = {
-        nvim_lsp = 'λ',
-        luasnip = '⋗',
-        buffer = 'Ω',
-        path = '🖫',
-        nvim_lua = 'Π',
-      }
-
-      item.menu = menu_icon[entry.source.name]
       return item
     end,
   },
