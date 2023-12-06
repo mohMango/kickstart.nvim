@@ -711,6 +711,7 @@ vim.api.nvim_create_autocmd({ 'FileType' }, {
   callback = function()
     vim.cmd [[
       nnoremap <silent> <buffer> <leader>q :bd<CR>
+      nnoremap <silent> <buffer> <leader>e :bd<CR>
       set nobuflisted
     ]]
   end,
