@@ -337,6 +337,8 @@ require('lazy').setup({
   },
   {
     'ThePrimeagen/harpoon',
+    branch = 'harpoon2',
+    event = 'VeryLazy',
     dependencies = 'nvim-lua/plenary.nvim',
   },
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -580,7 +582,6 @@ cmp.setup {
     { name = 'buffer' },
     { name = 'path' },
     { name = 'nvim_lua' },
-    { name = 'cmp_tabnine' },
   },
   mapping = cmp.mapping.preset.insert {
     ['<C-n>'] = cmp.mapping.select_next_item(),
@@ -620,24 +621,27 @@ rust_tools.setup {
 }
 
 -- [[ HARPOON ]]
-local harpoon_mark = require 'harpoon.mark'
-local harpoon_ui = require 'harpoon.ui'
+local harpoon = require 'harpoon'
+harpoon:setup()
 
--- vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
-vim.keymap.set('n', '<leader>ha', harpoon_mark.add_file, { desc = '[h]arpoon [a]dd' })
-vim.keymap.set('n', '<leader>he', harpoon_ui.toggle_quick_menu, { desc = '[h]arpoon [e]xplorer' })
+vim.keymap.set('n', '<leader>ha', function()
+  harpoon:list():append()
+end, { desc = '[h]arpoon [a]dd' })
+vim.keymap.set('n', '<leader>he', function()
+  harpoon.ui:toggle_quick_menu(harpoon:list())
+end, { desc = '[h]arpoon [e]xplorer' })
 
 vim.keymap.set('n', '<leader>1', function()
-  harpoon_ui.nav_file(1)
+  harpoon:list():select(1)
 end, { desc = 'Harpoon go to file [1]' })
 vim.keymap.set('n', '<leader>2', function()
-  harpoon_ui.nav_file(2)
+  harpoon:list():select(2)
 end, { desc = 'Harpoon go to file [2]' })
 vim.keymap.set('n', '<leader>3', function()
-  harpoon_ui.nav_file(3)
+  harpoon:list():select(3)
 end, { desc = 'Harpoon go to file [3]' })
 vim.keymap.set('n', '<leader>4', function()
-  harpoon_ui.nav_file(4)
+  harpoon:list():select(4)
 end, { desc = 'Harpoon go to file [4]' })
 
 -- [[ NETRW ]]
