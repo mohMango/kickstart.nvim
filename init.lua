@@ -295,6 +295,7 @@ require('lazy').setup({
   { 'mbbill/undotree' },
   {
     'windwp/nvim-autopairs',
+    event = { 'BufReadPre', 'BufNewFile' },
     -- Optional dependency
     dependencies = { 'hrsh7th/nvim-cmp' },
     config = function()
@@ -305,7 +306,6 @@ require('lazy').setup({
       cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
     end,
   },
-  { 'Ciel-MC/rust-tools.nvim' },
   {
     'stevearc/conform.nvim',
     event = { 'BufReadPre', 'BufNewFile' },
@@ -607,16 +607,6 @@ cmp.setup {
   window = {
     completion = cmp.config.window.bordered(),
     documentation = cmp.config.window.bordered(),
-  },
-}
-
-local rust_tools = require 'rust-tools'
-rust_tools.setup {
-  server = {
-    on_attach = function(_, bufnr)
-      vim.keymap.set('n', '<Leader>rr', rust_tools.runnables.runnables, { buffer = bufnr, desc = '[r]ust [r]un' })
-      rust_tools.inlay_hints.enable()
-    end,
   },
 }
 
