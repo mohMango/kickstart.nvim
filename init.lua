@@ -206,7 +206,7 @@ require('lazy').setup({
     config = function()
       require('catppuccin').setup {
         flavour = 'macchiato', -- latte, frappe, macchiato, mocha
-        transparent_background = true, -- disables setting the background color.
+        transparent_background = false, -- disables setting the background color.
         show_end_of_buffer = true, -- shows the '~' characters after the end of buffers
         term_colors = false, -- sets terminal colors (e.g. `g:terminal_color_0`)
         no_italic = false, -- Force no italic
@@ -612,7 +612,7 @@ cmp.setup {
 
 -- [[ HARPOON ]]
 local harpoon = require 'harpoon'
-harpoon:setup()
+harpoon:setup {}
 
 vim.keymap.set('n', '<leader>ha', function()
   harpoon:list():append()
@@ -633,6 +633,9 @@ end, { desc = 'Harpoon go to file [3]' })
 vim.keymap.set('n', '<leader>4', function()
   harpoon:list():select(4)
 end, { desc = 'Harpoon go to file [4]' })
+vim.keymap.set('n', '<leader>5', function()
+  harpoon:list():select(5)
+end, { desc = 'Harpoon go to file [5]' })
 
 -- [[ NETRW ]]
 vim.g.netrw_liststyle = 4
@@ -740,6 +743,37 @@ vim.api.nvim_create_user_command('VexploreFind', function()
     Netrw_buffer = -1
   end
 end, {})
+
+-- additional filetypes
+vim.filetype.add {
+  extension = {
+    templ = 'templ',
+  },
+}
+
+require('lspconfig').tailwindcss.setup {
+  filetypes = {
+    'templ',
+    'html',
+    -- include any other filetypes where you need tailwindcs
+  },
+  init_options = {
+    userLanguages = {
+      templ = 'html',
+    },
+  },
+}
+
+require('lspconfig').htmx.setup {
+  filetypes = {
+    'templ',
+  },
+  init_options = {
+    userLanguages = {
+      templ = 'html',
+    },
+  },
+}
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
