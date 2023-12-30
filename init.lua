@@ -92,13 +92,14 @@ require('lazy').setup({
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
       {
         'j-hui/fidget.nvim',
-        tag = 'legacy',
         opts = {
-          window = {
-            relative = 'win', -- where to anchor, either "win" or "editor"
-            blend = 0, -- &winblend for the window
-            zindex = nil, -- the zindex value for the window
-            border = 'none', -- style of border for the fidget window
+          notification = {
+            window = {
+              relative = 'editor', -- where to anchor, either "win" or "editor"
+              winblend = 0, -- &winblend for the window
+              zindex = nil, -- the zindex value for the window
+              border = '', -- style of border for the fidget window
+            },
           },
         },
       },
@@ -206,7 +207,7 @@ require('lazy').setup({
     config = function()
       require('catppuccin').setup {
         flavour = 'macchiato', -- latte, frappe, macchiato, mocha
-        transparent_background = false, -- disables setting the background color.
+        transparent_background = true, -- disables setting the background color.
         show_end_of_buffer = true, -- shows the '~' characters after the end of buffers
         term_colors = false, -- sets terminal colors (e.g. `g:terminal_color_0`)
         no_italic = false, -- Force no italic
@@ -744,7 +745,7 @@ end, {})
 vim.filetype.add {
   extension = {
     templ = 'templ',
- },
+  },
 }
 
 require('lspconfig').tailwindcss.setup {
