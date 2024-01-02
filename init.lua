@@ -187,8 +187,8 @@ require('lazy').setup({
     'sainnhe/gruvbox-material',
     priority = 1000,
     config = function()
-      vim.g.gruvbox_material_foreground = 'material'
-      vim.g.gruvbox_material_better_performance = 1
+      vim.g.gruvbox_material_foreground = 'mix'
+      vim.g.gruvbox_material_better_performance = 0
       vim.g.gruvbox_material_disable_italic_comment = 0
       vim.g.gruvbox_material_enable_bold = 1
       vim.g.gruvbox_material_enable_italic = 1
@@ -196,7 +196,7 @@ require('lazy').setup({
       vim.g.gruvbox_material_ui_contrast = 'high'
       vim.g.gruvbox_material_diagnostic_line_highlight = 1
       vim.g.gruvbox_material_diagnostic_virtual_text = 'colored'
-      -- vim.cmd.colorscheme 'gruvbox-material'
+      vim.cmd.colorscheme 'gruvbox-material'
     end,
   },
 
@@ -220,7 +220,7 @@ require('lazy').setup({
         end,
       }
       -- setup must be called before loading
-      vim.cmd.colorscheme 'catppuccin'
+      -- vim.cmd.colorscheme 'catppuccin'
     end,
   },
 
@@ -231,7 +231,7 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = false,
-        theme = 'catppuccin',
+        theme = 'auto',
         component_separators = '|',
         section_separators = '',
       },
@@ -384,7 +384,7 @@ local options = {
   foldlevel = 99,
 
   backup = false, -- creates a backup file
-  clipboard = 'unnamedplus', -- allows neovim to access the system clipboard
+  clipboard = '', -- allows neovim to access the system clipboard
   cmdheight = 1, -- more space in the neovim command line for displaying messages
   conceallevel = 0, -- so that `` is visible in markdown files
   fileencoding = 'utf-8', -- the encoding written to a file
