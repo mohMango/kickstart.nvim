@@ -12,6 +12,10 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup('custom.plugins', {
+  install = {
+    missing = true,
+    colorscheme = { 'gruvbox-material', 'habamax' },
+  },
   ui = {
     border = 'rounded',
   },
