@@ -16,7 +16,6 @@ vim.api.nvim_create_user_command('ExploreFind', function()
   if string.len(relative_path) == 0 then
     vim.cmd.let "@/='./'"
   end
-  print('Explore ' .. relative_path)
   vim.cmd('Explore ' .. relative_path)
   vim.cmd.normal 'n'
   vim.cmd.normal 'zz'
